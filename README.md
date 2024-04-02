@@ -10,7 +10,7 @@ To run this application, you need to have Go installed on your system. If you do
 
 1. Clone the repository to your local machine:
    ```
-   git clone https://github.com/YourUsername/vocabulary_quiz.git
+   git clone https://github.com/StephanHav/vocabulary_quiz.git
    ```
 2. Navigate to the cloned repository:
    ```
