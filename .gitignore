@@ -1,0 +1,17 @@
+#Executable binary
+quiz
+
+# Compiled object files, archives, and executables
+*.o
+*.a
+*.so
+/bin/
+/pkg/
+
+# Dependency directories (remove these lines if you prefer to keep your vendor directory)
+/vendor/
+
+# Editor settings and temporary files
+*.swp
+*~
+.DS_Store
