@@ -8,29 +8,34 @@ import (
 	"time"
 )
 
-func randInt(min, max int) int {
-	return min + rand.Intn(max-min)
+func randInt(rng *rand.Rand, min, max int) int {
+	return min + rng.Intn(max-min)
 }
 
-func main() {
-	// Open the CSV file
-	file, err := os.Open("words.csv")
+func openCSV(fileName string) ([][]string, error) {
+
+	//Open the CSV file
+	file, err := os.Open(fileName)
 	if err != nil {
-		fmt.Println("Error:", err)
-		return
+		return nil, err
 	}
 	defer file.Close()
 
-	// Read the CSV data into a slice of slices
+	//Read the CSV data into a slice of slices
 	reader := csv.NewReader(file)
-	rows, err := reader.ReadAll()
+	data, err := reader.ReadAll()
 	if err != nil {
-		fmt.Println("Error:", err)
-		return
+		return nil, err
 	}
 
-	// Convert the slice of slices to a dataframe
-	var dataframe [][]string = rows
+	return data, nil
+}
+
+func runQuiz(dataframe [][]string, column int) {
+
+	// Create a new source and rng at the start of each quiz
+	source := rand.NewSource(time.Now().UnixNano())
+	rng := rand.New(source)
 
 	// Define the amount of words you want to practice
 	var num_questions int
@@ -40,23 +45,19 @@ func main() {
 	fmt.Println("Please write the English translation of the following words: ")
 
 	// Quiz
-	var correct_answers int = 0
-	var wrong_answers int = 0
+	var correct_answers, wrong_answers int
 	for i := 0; i < num_questions; i++ {
 
-		// Make sure new seed is generated every run
-		rand.Seed(time.Now().UnixNano())
-
 		// Pick random word to practice
-		var word_index int = randInt(0, len(dataframe))
-		fmt.Print(dataframe[word_index][0], " = ")
+		var word_index int = randInt(rng, 0, len(dataframe))
+		fmt.Print(dataframe[word_index][column], " = ")
 
 		// Prompt user for English translation
 		var translation string
 		fmt.Scanln(&translation)
 
 		// Check answer
-		if translation == dataframe[word_index][1] {
+		if translation == dataframe[word_index][column+1] {
 			correct_answers++
 			fmt.Println("Correct!", "\n")
 		} else {
@@ -69,5 +70,29 @@ func main() {
 	fmt.Println("Your final score out of", num_questions, "words is:", "\n")
 	fmt.Println(correct_answers, "Correct")
 	fmt.Println(wrong_answers, "Wrong", "\n")
+}
 
+func main() {
+
+	dataframe, err := openCSV("words.csv")
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+
+	// Skip the first row (header)
+	dataframe = dataframe[1:]
+
+	// Prompt for language selection
+	fmt.Println("\n", "Select a language (1 for Russian, 2 for Spanish, 3 for Dutch):", "\n")
+	var language int
+	fmt.Scanln(&language)
+	fmt.Println("\n")
+
+	// Adjust column based on selected language
+	// Assuming Russian=0, Spanish=1, Dutch=2 for simplicity
+	column := (language - 1) * 2
+
+	//Run quiz
+	runQuiz(dataframe, column)
 }
